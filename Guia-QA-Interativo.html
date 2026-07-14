@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia QA Interativo — Arthur</title>
+<style>
+  :root{
+    --bg:#0f1220; --bg2:#161a2e; --card:#1c2138; --card2:#232a47;
+    --txt:#e7eaf6; --muted:#9aa3c7; --line:#2c3358;
+    --accent:#6c8cff; --accent2:#8b5cf6; --ok:#33d69f; --err:#ff6b81; --warn:#ffb454; --pink:#ff7eb6; --code:#0b0e1a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:linear-gradient(160deg,#0f1220,#13162a 60%,#0f1220); color:var(--txt); line-height:1.65; padding-bottom:80px}
+  a{color:var(--accent); text-decoration:none} a:hover{text-decoration:underline}
+  code{background:var(--code); padding:2px 6px; border-radius:5px; font-size:.9em; color:#a8ffea; font-family:'Consolas',monospace}
+  pre{background:var(--code); padding:14px 16px; border-radius:10px; overflow-x:auto; border:1px solid var(--line); font-size:.85em}
+  pre code{background:none; padding:0; color:#cdd6ff}
+
+  header{position:sticky; top:0; z-index:50; background:rgba(15,18,32,.93); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); padding:14px 24px}
+  .head-row{max-width:880px; margin:0 auto; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+  h1{font-size:1.3rem; margin:0; flex:1; min-width:200px}
+  h1 span{background:linear-gradient(90deg,var(--accent),var(--pink)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+  .meta{font-size:.78rem; color:var(--muted); margin-top:2px}
+  .progress-wrap{flex:1; min-width:220px}
+  .progress-bar{height:14px; background:var(--bg2); border-radius:20px; overflow:hidden; border:1px solid var(--line)}
+  .progress-fill{height:100%; width:0%; background:linear-gradient(90deg,var(--ok),var(--accent)); transition:width .4s; border-radius:20px}
+  .progress-label{font-size:.76rem; color:var(--muted); margin-top:4px; text-align:right}
+  .btn-reset{background:transparent; border:1px solid var(--line); color:var(--muted); padding:6px 12px; border-radius:8px; cursor:pointer; font-size:.76rem}
+  .btn-reset:hover{border-color:var(--pink); color:var(--pink)}
+
+  .wrap{max-width:880px; margin:0 auto; padding:24px}
+  .intro{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px 22px; margin-bottom:22px}
+  .rule{border-left:4px solid var(--warn); background:rgba(255,180,84,.08); padding:12px 16px; border-radius:8px; margin:14px 0; font-size:.95rem}
+
+  .block{background:var(--card); border:1px solid var(--line); border-radius:14px; margin-bottom:16px; overflow:hidden}
+  .block-head{display:flex; align-items:center; gap:14px; padding:16px 20px; cursor:pointer; user-select:none; transition:background .2s}
+  .block-head:hover{background:var(--card2)}
+  .block-num{flex-shrink:0; width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.05rem}
+  .block-title{flex:1}
+  .block-title h2{margin:0; font-size:1.08rem}
+  .block-title .sub{font-size:.8rem; color:var(--muted)}
+  .block-status{font-size:.72rem; padding:4px 10px; border-radius:20px; background:var(--bg2); color:var(--muted); white-space:nowrap}
+  .block-status.done{background:rgba(51,214,159,.15); color:var(--ok)}
+  .chev{transition:transform .3s; color:var(--muted)}
+  .block.open .chev{transform:rotate(90deg)}
+  .block-body{display:none; padding:4px 22px 22px; border-top:1px solid var(--line)}
+  .block.open .block-body{display:block}
+
+  h3{font-size:1rem; margin:18px 0 8px; color:#cdd6ff}
+  h4{font-size:.95rem; margin:16px 0 6px; color:var(--pink)}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:.85rem}
+  th,td{border:1px solid var(--line); padding:7px 10px; text-align:left} th{background:var(--bg2)}
+
+  .study{background:rgba(108,140,255,.07); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:14px 0}
+  .study h4{margin-top:0}
+  .study ul{list-style:none; padding:0; margin:6px 0}
+  .study li{padding:6px 0; border-bottom:1px dashed var(--line); font-size:.9rem} .study li:last-child{border:none}
+  .src{display:inline-block; font-size:.68rem; font-weight:700; padding:2px 7px; border-radius:5px; margin-right:8px; vertical-align:middle}
+  .src-alura{background:#0d4f8b; color:#cfe3ff} .src-yt{background:#7a1620; color:#ffd0d6} .src-udemy{background:#5a2d82; color:#e9d6ff} .src-doc{background:#244; color:#aef}
+
+  /* QUIZ */
+  .quiz-title{margin:22px 0 10px; font-size:1rem; color:var(--ok); display:flex; align-items:center; gap:8px}
+  .q{background:var(--card2); border:1px solid var(--line); border-radius:11px; padding:15px 17px; margin-bottom:13px}
+  .q-num{font-size:.72rem; color:var(--accent); font-weight:700; letter-spacing:.5px}
+  .q-text{font-weight:600; margin:5px 0 12px; font-size:.96rem}
+  .opt{display:flex; align-items:flex-start; gap:11px; padding:10px 13px; margin:6px 0; background:var(--card); border:1px solid var(--line); border-radius:9px; cursor:pointer; transition:.15s}
+  .opt:hover{border-color:var(--accent)}
+  .opt .dot{flex-shrink:0; width:19px; height:19px; border-radius:50%; border:2px solid var(--muted); margin-top:1px; position:relative; transition:.15s}
+  .opt span.txt{flex:1; font-size:.9rem}
+  .opt.correct{border-color:var(--ok); background:rgba(51,214,159,.12)}
+  .opt.correct .dot{border-color:var(--ok); background:var(--ok)}
+  .opt.correct .dot::after{content:'✓'; position:absolute; color:#0f1220; font-weight:800; font-size:11px; left:3px; top:-2px}
+  .opt.wrong{border-color:var(--err); background:rgba(255,107,129,.12)}
+  .opt.wrong .dot{border-color:var(--err); background:var(--err)}
+  .opt.wrong .dot::after{content:'✕'; position:absolute; color:#0f1220; font-weight:800; font-size:10px; left:4px; top:-1px}
+  .opt.locked{cursor:default}
+  .feedback{display:none; margin-top:9px; padding:9px 13px; border-radius:8px; font-size:.86rem}
+  .feedback.show{display:block}
+  .feedback.ok{background:rgba(51,214,159,.1); color:var(--ok); border:1px solid rgba(51,214,159,.3)}
+  .feedback.no{background:rgba(255,107,129,.1); color:#ffb3bf; border:1px solid rgba(255,107,129,.3)}
+  textarea{width:100%; min-height:80px; background:var(--code); color:var(--txt); border:1px solid var(--line); border-radius:9px; padding:10px 12px; font-family:inherit; font-size:.9rem; resize:vertical}
+  textarea:focus{outline:none; border-color:var(--accent)}
+  .open-actions{margin-top:9px; display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  .mini-btn{background:transparent; border:1px solid var(--line); color:var(--muted); padding:6px 12px; border-radius:8px; cursor:pointer; font-size:.78rem}
+  .mini-btn:hover{border-color:var(--accent); color:var(--accent)}
+  .model{display:none; margin-top:11px; padding:11px 14px; background:var(--bg2); border:1px solid var(--accent2); border-radius:9px; font-size:.88rem}
+  .model.show{display:block} .model b{color:var(--pink)}
+  .selfgrade{display:none; margin-top:9px; gap:7px; flex-wrap:wrap; align-items:center; font-size:.83rem; color:var(--muted)}
+  .selfgrade.show{display:flex}
+  .sg-btn{border:1px solid var(--line); background:transparent; color:var(--muted); padding:5px 11px; border-radius:20px; cursor:pointer; font-size:.78rem}
+  .sg-btn:hover{border-color:var(--accent)}
+  .sg-btn.sel-ok{background:var(--ok); color:#0f1220; border-color:var(--ok)}
+  .sg-btn.sel-mid{background:var(--warn); color:#0f1220; border-color:var(--warn)}
+  .sg-btn.sel-no{background:var(--err); color:#0f1220; border-color:var(--err)}
+  .saved{font-size:.7rem; color:var(--ok); opacity:0; transition:.3s} .saved.show{opacity:1}
+  .practice{font-size:.86rem; color:var(--muted); background:rgba(139,92,246,.07); border:1px solid var(--line); border-radius:9px; padding:11px 14px; margin:12px 0}
+  .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--ok); color:#0f1220; padding:11px 20px; border-radius:30px; font-weight:600; box-shadow:0 8px 30px rgba(0,0,0,.4); transition:transform .4s; z-index:100}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  footer{text-align:center; color:var(--muted); font-size:.8rem; padding:30px}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-row">
+    <div style="flex:1; min-width:200px">
+      <h1>🧪 Guia <span>QA Interativo</span></h1>
+      <div class="meta">Arthur · meta: vaga em outubro/2026 · estude e responda aqui mesmo</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="fill"></div></div>
+      <div class="progress-label" id="plabel">0 de 0 respondidas (0%)</div>
+    </div>
+    <button class="btn-reset" onclick="resetAll()">↺ Zerar</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="intro">
+    <p style="margin-top:0"><strong>Como funciona — bem simples:</strong> em cada bloco você (1) lê a <strong>matéria</strong>, (2) usa os links de <strong>onde estudar</strong> (Alura, YouTube, doc oficial) para se aprofundar, e (3) responde as <strong>perguntas no final</strong>, ali mesmo na tela. Múltipla escolha corrige na hora; nas abertas você digita e confere com a resposta-modelo. Não precisa salvar nada nem abrir arquivos — seu progresso fica salvo sozinho.</p>
+    <div class="rule">📜 <strong>Regra de ouro:</strong> só avance de bloco quando acertar as perguntas dele. Errou? Releia a matéria e responda de novo — é assim que fixa.</div>
+    <a href="Sistema-EscolaNotas.html" target="_blank" style="display:inline-block; margin-top:14px; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; padding:11px 20px; border-radius:10px; font-weight:600; text-decoration:none">🏫 Abrir o Sistema EscolaNotas (sua área de prática) →</a>
+    <p style="font-size:.85rem; color:var(--muted); margin-top:8px">Sistema escolar funcional para você praticar: escrever plano de teste, casos de teste, achar bugs e (mais pra frente) automatizar com Playwright. As regras estão na aba <strong>Requisitos</strong>.</p>
+  </div>
+
+  <!-- BLOCO 0 -->
+  <div class="block">
+    <div class="block-head" onclick="toggle(this)">
+      <div class="block-num">0</div>
+      <div class="block-title"><h2>Setup do ambiente</h2><div class="sub">revisão — você já fez</div></div>
+      <div class="block-status" data-block="b0">—</div><div class="chev">▶</div>
+    </div>
+    <div class="block-body">
+      <p>Você já instalou <strong>Cursor, Node (LTS), Git, GitHub e Postman</strong>. QA nunca confia — sempre verifica. Abra o terminal e rode:</p>
+      <pre><code>node -v
+npm -v
+git --version
+cursor -v</code></pre>
+      <div class="rule">💡 O <strong>Cursor</strong> é um fork do VSCode: extensões e atalhos funcionam igual; só o comando muda (<code>cursor</code> no lugar de <code>code</code>).</div>
+      <div class="quiz" id="quiz-b0"></div>
+    </div>
+  </div>
+
+  <!-- BLOCO 1 -->
+  <div class="block">
+    <div class="block-head" onclick="toggle(this)">
+      <div class="block-num">1</div>
+      <div class="block-title"><h2>Fundamentos de QA</h2><div class="sub">SDLC, STLC, papel do QA, tipos de teste, pirâmide</div></div>
+      <div class="block-status" data-block="b1">—</div><div class="chev">▶</div>
+    </div>
+    <div class="block-body">
+      <h3>SDLC vs STLC</h3>
+      <p><strong>SDLC</strong> = ciclo de vida do software inteiro (requisitos → design → dev → teste → deploy → manutenção). <strong>STLC</strong> = ciclo de vida só da parte de teste, que vive dentro do SDLC. 🧠 O STLC é um "zoom in" na fase de testes. QA bom atua desde os <strong>requisitos</strong> (shift-left).</p>
+      <h3>Tipos de teste</h3>
+      <table>
+        <tr><th>Nível</th><th>O que testa</th><th>Quem faz</th><th>Velocidade</th></tr>
+        <tr><td>Unitário</td><td>Função isolada</td><td>Dev</td><td>⚡ rápido</td></tr>
+        <tr><td>Integração</td><td>Unidades juntas / APIs</td><td>Dev/QA</td><td>médio</td></tr>
+        <tr><td>Sistema</td><td>App inteiro (visão do usuário)</td><td>QA</td><td>lento</td></tr>
+        <tr><td>Aceitação</td><td>Atende ao negócio?</td><td>QA/PO</td><td>lento</td></tr>
+      </table>
+      <p>Também existem: <strong>funcional</strong> (o que faz) × <strong>não-funcional</strong> (quão bem: performance, segurança, usabilidade); <strong>regressão</strong> (garante que mudança nova não quebrou o que já existia); <strong>smoke</strong> (o build "respira"?) e <strong>sanity</strong> (checagem rápida e focada após um fix).</p>
+      <h3>Pirâmide de testes</h3>
+      <pre><code>      /\
+     /  \     E2E/UI  ← poucos, lentos (Playwright)
+    /----\
+   /      \   Integração/API  ← médio (Postman)
+  /--------\
+ /          \ Unitário  ← muitos, rápidos
+/____________\</code></pre>
+      <p>🧠 Anti-padrão = "cone de sorvete" (muito E2E, pouco unitário): lento, instável e caro.</p>
+
+      <div class="study">
+        <h4>📍 Onde estudar este bloco</h4>
+        <ul>
+          <li><span class="src src-alura">ALURA</span><a href="https://cursos.alura.com.br/carreira-qa-tester-escola-programacao-1711659010592-p748324" target="_blank">QA/Testes do zero ao avançado</a> — módulos de fundamentos</li>
+          <li><span class="src src-yt">YOUTUBE</span><a href="https://www.youtube.com/@startqa" target="_blank">Start QA (Marcos Franco)</a> — vídeos de fundamentos de QA</li>
+          <li><span class="src src-doc">DOC</span><a href="https://bstqb.online/files/syllabus_ctfl_4.0br.pdf" target="_blank">Syllabus ISTQB CTFL 4.0 (PT-BR)</a> — a "bíblia" dos fundamentos (cap. 1)</li>
+        </ul>
+      </div>
+      <div class="quiz" id="quiz-b1"></div>
+    </div>
+  </div>
+
+  <!-- BLOCO 2 -->
+  <div class="block">
+    <div class="block-head" onclick="toggle(this)">
+      <div class="block-num">2</div>
+      <div class="block-title"><h2>Técnicas de design de teste</h2><div class="sub">partições, valor limite, tabela de decisão, estados</div></div>
+      <div class="block-status" data-block="b2">—</div><div class="chev">▶</div>
+    </div>
+    <div class="block-body">
+      <p><strong>Partição de equivalência:</strong> divida as entradas em grupos que se comportam igual; teste 1 valor de cada. <strong>Valor limite (boundary):</strong> bugs moram nas bordas — teste o valor antes, o exato e o depois. <strong>Tabela de decisão:</strong> para combinações de condições. <strong>Transição de estados:</strong> para fluxos com estados, testando transições válidas e inválidas.</p>
+      <p><strong>Exemplo (cupom):</strong> "até R$50 sem desconto; de R$50 a R$200 = 10%; acima de R$200 = 15%". Note o problema: R$50 e R$200 estão em <em>duas</em> faixas ao mesmo tempo — ambiguidade clássica de borda. Achar isso é trabalho de QA.</p>
+      <div class="study">
+        <h4>📍 Onde estudar este bloco</h4>
+        <ul>
+          <li><span class="src src-alura">ALURA</span><a href="https://www.alura.com.br/curso-online-qualidade-software-testes-eficientes" target="_blank">Qualidade de Software: testes eficientes</a></li>
+          <li><span class="src src-yt">YOUTUBE</span>Busque "técnicas de teste partição equivalência valor limite" + <a href="https://www.youtube.com/@startqa" target="_blank">Start QA</a></li>
+          <li><span class="src src-doc">DOC</span><a href="https://bstqb.online/files/syllabus_ctfl_4.0br.pdf" target="_blank">Syllabus CTFL 4.0</a> — capítulo 4 (técnicas caixa-preta)</li>
+        </ul>
+      </div>
+      <div class="quiz" id="quiz-b2"></div>
+    </div>
+  </div>
+
+  <!-- BLOCO 3 -->
+  <div class="block">
+    <div class="block-head" onclick="toggle(this)">
+      <div class="block-num">3</div>
+      <div class="block-title"><h2>Plano de teste, casos & bug report</h2><div class="sub">os artefatos do dia a dia</div></div>
+      <div class="block-status" data-block="b3">—</div><div class="chev">▶</div>
+    </div>
+    <div class="block-body">
+      <p><strong>Plano de teste:</strong> o que será (e não será) testado, como, quem, quando, riscos e critérios. <strong>Caso de teste:</strong> ID · título · pré-condição · passos · resultado esperado · obtido · status. <strong>Bug report:</strong> título claro, passos pra reproduzir, esperado vs obtido, ambiente, evidência, severidade × prioridade.</p>
+      <p>🧠 <strong>Severidade ≠ Prioridade.</strong> Severidade = impacto técnico; Prioridade = urgência de negócio. Ex.: typo no logo = severidade baixa, mas prioridade alta no dia do lançamento.</p>
+      <div class="study">
+        <h4>📍 Onde estudar este bloco</h4>
+        <ul>
+          <li><span class="src src-alura">ALURA</span><a href="https://www.alura.com.br/curso-online-quality-assurance-plano-testes-gestao-bugs" target="_blank">QA: plano de testes e gestão de bugs</a></li>
+          <li><span class="src src-yt">YOUTUBE</span>Busque "como reportar bug plano de teste QA" + <a href="https://www.youtube.com/@startqa" target="_blank">Start QA</a></li>
+        </ul>
+      </div>
+      <div class="quiz" id="quiz-b3"></div>
+    </div>
+  </div>
+
+  <!-- BLOCO 4 -->
+  <div class="block">
+    <div class="block-head" onclick="toggle(this)">
+      <div class="block-num">4</div>
+      <div class="block-title"><h2>BDD + Gherkin</h2><div class="sub">a língua comum do time</div></div>
+      <div class="block-status" data-block="b4">—</div><div class="chev">▶</div>
+    </div>
+    <div class="block-body">
+      <pre><code>Funcionalidade: Login no sistema
+
+  Cenário: Login com credenciais válidas
+    Dado que estou na página de login
+    Quando preencho email e senha corretos
+    E clico em "Entrar"
+    Então sou redirecionado para o painel</code></pre>
+      <p><strong>Dado</strong> (contexto) · <strong>Quando</strong> (ação) · <strong>Então</strong> (resultado). 🧠 Gherkin é declarativo — descreve o <em>o quê</em>, não o <em>como</em>. Esses cenários viram base dos testes automatizados depois.</p>
+      <div class="study">
+        <h4>📍 Onde estudar este bloco</h4>
+        <ul>
+          <li><span class="src src-yt">YOUTUBE</span>Busque "BDD Cucumber Gherkin português" + <a href="https://www.youtube.com/@startqa" target="_blank">Start QA</a></li>
+          <li><span class="src src-doc">DOC</span><a href="https://cucumber.io/docs/gherkin/" target="_blank">Documentação oficial do Gherkin</a></li>
+        </ul>
+      </div>
+      <div class="quiz" id="quiz-b4"></div>
+    </div>
+  </div>
+
+  <!-- BLOCO 5 -->
+  <div class="block">
+    <div class="block-head" onclick="toggle(this)">
+      <div class="block-num">5</div>
+      <div class="block-title"><h2>JavaScript (básico → intermediário)</h2><div class="sub">a base da automação</div></div>
+      <div class="block-status" data-block="b5">—</div><div class="chev">▶</div>
+    </div>
+    <div class="block-body">
+      <p><strong>O que dominar:</strong> variáveis (<code>let/const</code>), tipos, comparação <code>===</code>, <code>if/for</code>, <strong>funções</strong> e arrow functions, <strong>arrays</strong> (<code>map/filter/find/forEach/includes</code>), objetos e desestruturação, <strong>async/await</strong> e Promises, módulos (<code>import/export</code>). Não precisa virar dev full-stack — precisa ler e escrever lógica de teste.</p>
+      <div class="study">
+        <h4>📍 Onde estudar este bloco</h4>
+        <ul>
+          <li><span class="src src-yt">YOUTUBE</span><a href="https://www.youtube.com/playlist?list=PLXBUzym33L_6tnu5lgkX7XbrQRd7ADrRa" target="_blank">Aprenda JavaScript do Zero — Curso Completo</a></li>
+          <li><span class="src src-udemy">UDEMY</span><a href="https://www.udemy.com/course/curso-javascript/" target="_blank">JavaScript do Zero ao Avançado</a> (vá até async/await)</li>
+        </ul>
+      </div>
+      <div class="practice">🛠️ <strong>Pratique junto (opcional, mas recomendado):</strong> a cada aula, reescreva o código no Cursor e rode com <code>node arquivo.js</code>. Ver o resultado aparecer fixa muito mais que só assistir.</div>
+      <div class="quiz" id="quiz-b5"></div>
+    </div>
+  </div>
+
+  <!-- BLOCO 6 -->
+  <div class="block">
+    <div class="block-head" onclick="toggle(this)">
+      <div class="block-num">6</div>
+      <div class="block-title"><h2>TypeScript</h2><div class="sub">JS + tipos (o padrão do Playwright)</div></div>
+      <div class="block-status" data-block="b6">—</div><div class="chev">▶</div>
+    </div>
+    <div class="block-body">
+      <p>TypeScript = JavaScript + <strong>tipos</strong>. Tipar parâmetros/retorno (<code>function soma(a: number, b: number): number</code>), <code>interface</code> e <code>type</code>. Pra QA importa porque o editor avisa o erro <strong>antes</strong> de rodar — menos bug no próprio código de teste.</p>
+      <div class="study">
+        <h4>📍 Onde estudar este bloco</h4>
+        <ul>
+          <li><span class="src src-yt">YOUTUBE</span>Busque "TypeScript para iniciantes português" + <a href="https://www.youtube.com/@startqa" target="_blank">Start QA</a> (usa TS com Playwright)</li>
+          <li><span class="src src-doc">DOC</span><a href="https://www.typescriptlang.org/docs/handbook/intro.html" target="_blank">TypeScript Handbook</a></li>
+        </ul>
+      </div>
+      <div class="quiz" id="quiz-b6"></div>
+    </div>
+  </div>
+
+  <!-- BLOCO 7 -->
+  <div class="block">
+    <div class="block-head" onclick="toggle(this)">
+      <div class="block-num">7</div>
+      <div class="block-title"><h2>Git & GitHub</h2><div class="sub">fluxo de time real</div></div>
+      <div class="block-status" data-block="b7">—</div><div class="chev">▶</div>
+    </div>
+    <div class="block-body">
+      <p><strong>Branches</strong> (<code>git checkout -b feature/nome</code> — nunca direto na main), <strong>Pull Request</strong> (como o time revisa código), mensagens no padrão <strong>Conventional Commits</strong> (<code>feat: fix: test: docs:</code>), <code>.gitignore</code> (nunca suba <code>node_modules</code> nem senhas), e resolver conflitos.</p>
+      <div class="study">
+        <h4>📍 Onde estudar este bloco</h4>
+        <ul>
+          <li><span class="src src-yt">YOUTUBE</span>Busque "Git e GitHub para iniciantes português" (Curso em Vídeo / Rocketseat)</li>
+          <li><span class="src src-doc">GRÁTIS</span><a href="https://learngitbranching.js.org/?locale=pt_BR" target="_blank">Learn Git Branching</a> — jogo interativo em português</li>
+        </ul>
+      </div>
+      <div class="quiz" id="quiz-b7"></div>
+    </div>
+  </div>
+
+  <!-- BLOCO 8 -->
+  <div class="block">
+    <div class="block-head" onclick="toggle(this)">
+      <div class="block-num">8</div>
+      <div class="block-title"><h2>Teste de API</h2><div class="sub">Postman + automação</div></div>
+      <div class="block-status" data-block="b8">—</div><div class="chev">▶</div>
+    </div>
+    <div class="block-body">
+      <p><strong>HTTP:</strong> métodos (GET/POST/PUT/PATCH/DELETE) e status codes (200, 201, 400, 401, 404, 500). <strong>O que testar numa API:</strong> status code correto, formato do JSON, campos obrigatórios, casos de erro. No Postman: coleção, variáveis de ambiente, e testes na aba <em>Tests</em> (<code>pm.test(...)</code>).</p>
+      <div class="study">
+        <h4>📍 Onde estudar este bloco</h4>
+        <ul>
+          <li><span class="src src-doc">GRÁTIS</span>APIs de treino: <a href="https://reqres.in/" target="_blank">ReqRes</a> e <a href="https://jsonplaceholder.typicode.com/" target="_blank">JSONPlaceholder</a></li>
+          <li><span class="src src-yt">YOUTUBE</span>Busque "teste de API com Postman português" + <a href="https://www.youtube.com/@startqa" target="_blank">Start QA</a></li>
+          <li><span class="src src-doc">DOC</span><a href="https://learning.postman.com/" target="_blank">Learning Postman</a></li>
+        </ul>
+      </div>
+      <div class="practice">🛠️ <strong>Pratique junto (opcional):</strong> crie uma coleção no Postman batendo no ReqRes (GET /users, POST /register, GET de um id inexistente = 404) e escreva 1 teste por request.</div>
+      <div class="quiz" id="quiz-b8"></div>
+    </div>
+  </div>
+
+  <!-- BLOCO 9 -->
+  <div class="block">
+    <div class="block-head" onclick="toggle(this)">
+      <div class="block-num">9</div>
+      <div class="block-title"><h2>Automação web com Playwright</h2><div class="sub">o carro-chefe do portfólio</div></div>
+      <div class="block-status" data-block="b9">—</div><div class="chev">▶</div>
+    </div>
+    <div class="block-body">
+      <p>No dia a dia, o QA automatiza os fluxos críticos (login, compra) que rodam a cada deploy = regressão automatizada; roda em CI; gera relatório e trace.</p>
+      <pre><code>npm init playwright@latest   # cria o projeto
+npx playwright test          # roda
+npx playwright codegen URL   # GRAVA suas ações e gera código
+npx playwright show-report   # abre o relatório</code></pre>
+      <pre><code>import { test, expect } from '@playwright/test';
+test('login válido', async ({ page }) => {
+  await page.goto('https://exemplo.com/login');
+  await page.getByLabel('Email').fill('user@teste.com');
+  await page.getByLabel('Senha').fill('senha123');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await expect(page.getByText('Bem-vindo')).toBeVisible();
+});</code></pre>
+      <p>Prefira <code>getByRole/getByLabel/getByText</code> (mais estáveis que CSS/XPath). <strong>Page Object Model (POM):</strong> cada página vira uma classe — organiza testes grandes.</p>
+      <div class="study">
+        <h4>📍 Onde estudar este bloco</h4>
+        <ul>
+          <li><span class="src src-yt">YOUTUBE</span><a href="https://www.youtube.com/@startqa" target="_blank">Start QA — Playwright + TypeScript</a> (grátis)</li>
+          <li><span class="src src-udemy">UDEMY</span><a href="https://www.udemy.com/course/testes-automatizados-com-playwright-typescript-basico-pt-br/" target="_blank">Playwright + TypeScript — Básico</a></li>
+          <li><span class="src src-doc">DOC</span><a href="https://playwright.dev/" target="_blank">Documentação oficial</a> · praticar em <a href="https://www.saucedemo.com/" target="_blank">SauceDemo</a></li>
+        </ul>
+      </div>
+      <div class="practice">🛠️ <strong>Pratique junto (opcional):</strong> instale o Playwright, use <code>codegen</code> pra gravar um login no SauceDemo, e depois reescreva na mão com <code>getByRole</code>. Esse é o exercício que mais vale no portfólio.</div>
+      <div class="quiz" id="quiz-b9"></div>
+    </div>
+  </div>
+
+  <!-- BLOCO 10 -->
+  <div class="block">
+    <div class="block-head" onclick="toggle(this)">
+      <div class="block-num">10</div>
+      <div class="block-title"><h2>Projeto final + Currículo</h2><div class="sub">o que te torna avançado(a) e contratável</div></div>
+      <div class="block-status" data-block="b10">—</div><div class="chev">▶</div>
+    </div>
+    <div class="block-body">
+      <p>Quando você dominar os blocos, o passo que realmente te contrata é juntar tudo num <strong>projeto</strong>: testar um e-commerce de demonstração (SauceDemo) com plano de teste + cenários BDD + testes de API (Postman) + testes E2E (Playwright) num repositório público no GitHub. Isso vira seu portfólio.</p>
+      <div class="rule">Sobre o currículo: <strong>evite "especialista/sênior" no início</strong> — recrutadores testam isso em entrevista. Posicione-se como <strong>QA júnior sólido com portfólio que prova</strong>. Ex.: "QA Engineer | Automação com Playwright & TypeScript". Certificação forte (opcional): <a href="https://bstqb.org.br/b9/ctfl" target="_blank">ISTQB CTFL 4.0</a>.</p>
+      <p>👉 Quando chegar aqui, me chama que a gente monta esse projeto e o currículo juntos, passo a passo.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Resposta salva ✓</div>
+<footer>Estude e responda aqui mesmo · seu progresso fica salvo neste navegador.</footer>
+
+<script>
+const KEY='guiaQA_arthur_v3';
+let store=JSON.parse(localStorage.getItem(KEY)||'{}');
+const open=JSON.parse(localStorage.getItem(KEY+'_open')||'{}');
+function save(){ localStorage.setItem(KEY, JSON.stringify(store)); }
+
+/* ============ PERGUNTAS POR BLOCO ============ */
+const QUIZ = {
+ b0:{ mc:[
+   {q:"Por que um QA roda os comandos de verificação (node -v, git --version) mesmo já tendo instalado tudo?",
+    o:["Para gastar tempo.","Porque QA não confia — sempre verifica que o ambiente realmente funciona.","Porque o Cursor exige.","Não há motivo, é opcional."], c:1,
+    e:"A mentalidade central do QA: verificar, não presumir. Vale pro ambiente e pro produto."}
+ ], open:[] },
+
+ b1:{ mc:[
+   {q:"Qual a diferença entre SDLC e STLC?",
+    o:["São sinônimos.","SDLC é o ciclo do software inteiro; STLC é o ciclo só da atividade de teste, dentro do SDLC.","STLC é o software inteiro; SDLC é só teste.","SDLC é web e STLC é mobile."], c:1,
+    e:"O STLC é um 'zoom in' na fase de testes do SDLC."},
+   {q:"O que é teste unitário?",
+    o:["Testa o sistema inteiro pela visão do usuário.","Testa uma função/unidade isolada, normalmente escrito pelo dev.","Testa integração entre APIs.","Testa performance sob carga."], c:1,
+    e:"Menor unidade isolada; é a base da pirâmide."},
+   {q:"Na pirâmide de testes, a proporção ideal é:",
+    o:["Muitos E2E, poucos unitários.","Quantidades iguais.","Muitos unitários na base, poucos E2E no topo.","Só E2E."], c:2,
+    e:"Base larga de unitários (rápidos/baratos), topo fino de E2E."},
+   {q:"O 'cone de sorvete' é:",
+    o:["Uma técnica de design.","Um anti-padrão: E2E demais e base unitária fraca.","O formato ideal.","Um teste de usabilidade."], c:1,
+    e:"Pirâmide invertida — lento, instável, caro."},
+   {q:"Verificação vs validação:",
+    o:["São a mesma coisa.","Verificação = 'estamos construindo certo (segue a spec)?'; Validação = 'construímos a coisa certa (atende o usuário)?'.","Verificação é manual, validação automatizada.","Verificação é só pra API."], c:1,
+    e:"Verificação olha a spec/processo; validação olha o valor pro usuário."},
+   {q:"Teste de regressão serve para:",
+    o:["Testar só o que é novo.","Garantir que uma mudança nova não quebrou o que já funcionava.","Medir tempo de resposta.","Avaliar usabilidade."], c:1,
+    e:"Repetitivo e frequente → principal candidato à automação."},
+   {q:"'Shift-left testing' significa:",
+    o:["Testar só no fim.","QA atuar cedo, já nos requisitos e design.","Mover testes pra direita.","Automatizar tudo."], c:1,
+    e:"Quanto mais cedo o defeito é achado, mais barato corrigir."},
+   {q:"Smoke vs Sanity:",
+    o:["São iguais.","Smoke checa funções críticas do build; sanity checa rápido uma função específica após um fix.","Sanity testa o build todo.","Ambos são teste de carga."], c:1,
+    e:"Smoke é amplo e raso; sanity é estreito e focado."}
+ ], open:[
+   {q:"Com suas palavras, qual a diferença entre SDLC e STLC?",
+    m:"SDLC = ciclo de vida do software inteiro (requisitos→design→dev→teste→deploy→manutenção). STLC = ciclo de vida só da atividade de teste, que acontece <b>dentro</b> do SDLC."},
+   {q:"Dê 1 exemplo de teste funcional e 1 não-funcional para um app de banco.",
+    m:"<b>Funcional:</b> transferir R$100 debita a origem e credita o destino. <b>Não-funcional:</b> a tela de saldo carrega em &lt;2s com 1000 usuários (performance) ou a senha trafega criptografada (segurança)."}
+ ]},
+
+ b2:{ mc:[
+   {q:"Para um campo 'idade (0 a 120)', quais valores limite testar?",
+    o:["Só 0 e 120.","50 e 60.","-1, 0, 1, 119, 120, 121.","Só acima de 120."], c:2,
+    e:"O valor antes, o exato e o depois de cada fronteira."},
+   {q:"O que é partição de equivalência?",
+    o:["Testar todos os valores um a um.","Dividir entradas em grupos que se comportam igual e testar 1 de cada.","Testar só as bordas.","Combinar condições numa tabela."], c:1,
+    e:"Reduz testes sem perder cobertura: 1 representante por grupo."},
+   {q:"Quando usar tabela de decisão?",
+    o:["Com uma entrada simples.","Quando o resultado depende de combinações de várias condições.","Só em performance.","Nunca."], c:1,
+    e:"Mapeia todas as combinações de condições e o resultado de cada."},
+   {q:"Teste de transição de estados serve para:",
+    o:["Medir performance.","Validar fluxos com estados, testando transições válidas E inválidas.","Testar só APIs.","Verificar acessibilidade."], c:1,
+    e:"Ex.: pedido criado→pago→enviado; e testar se dá pra pular etapas indevidamente."},
+   {q:"Na spec do cupom, 'até R$50' e 'de R$50 a R$200' criam que problema em R$50?",
+    o:["Nenhum.","Ambiguidade/sobreposição: R$50 cai nas duas faixas.","R$50 é sempre inválido.","O sistema trava."], c:1,
+    e:"Bordas sobrepostas são defeito clássico de especificação — QA acha antes de virar código."}
+ ], open:[
+   {q:"Liste as PARTIÇÕES de equivalência e os VALORES LIMITE do cupom (até R$50 = 0%; R$50,01–200 = 10%; acima de 200 = 15%).",
+    m:"<b>Partições:</b> ≤R$50 (0%), R$50,01–200 (10%), &gt;R$200 (15%) — testes: 30, 120, 300. <b>Valores limite:</b> 49,99 · 50,00 · 50,01 · 199,99 · 200,00 · 200,01."},
+   {q:"A spec do cupom tem ambiguidades. Aponte pelo menos 2 defeitos e diga o que perguntaria ao PO.",
+    m:"(1) <b>R$50 ambíguo</b> (cai em duas faixas). (2) <b>R$200 ambíguo</b> (10% ou 15%?). (3) <b>Valores inválidos</b> (zero/negativo) não tratados. (4) <b>'30 dias'/'24h'</b> sem definir se é &gt; ou &gt;=. Pergunta ao PO: 'R$50,00 e R$200,00 exatos entram em qual faixa? Sugiro limites sem sobreposição.'"}
+ ]},
+
+ b3:{ mc:[
+   {q:"Severidade e prioridade num bug:",
+    o:["São a mesma coisa.","Severidade = impacto técnico; Prioridade = urgência de negócio.","Severidade = urgência; Prioridade = impacto.","Só importam em automação."], c:1,
+    e:"São eixos independentes."},
+   {q:"Typo no logo da home, no dia do lançamento, é tipicamente:",
+    o:["Severidade alta, prioridade alta.","Severidade baixa, prioridade alta.","Severidade alta, prioridade baixa.","Tudo baixo."], c:1,
+    e:"Tecnicamente bobo (baixa severidade), mas péssimo na vitrine (alta prioridade)."},
+   {q:"Qual item é ESSENCIAL num bug report?",
+    o:["A cor favorita do testador.","Passos para reproduzir + resultado esperado vs obtido.","O nome do dev 'culpado'.","Quantos bugs achou hoje."], c:1,
+    e:"Sem passos reproduzíveis, o bug volta pra você."},
+   {q:"Um bom plano de teste responde principalmente:",
+    o:["Só quantos testes serão feitos.","O que será (e não será) testado, como, quem, quando, riscos e critérios.","O salário do QA.","A cor do botão."], c:1,
+    e:"Define escopo, abordagem, responsáveis, riscos e critérios."}
+ ], open:[
+   {q:"Quais itens NÃO podem faltar num bug report bem escrito?",
+    m:"Título claro · passos para reproduzir (numerados) · esperado vs obtido · ambiente (browser/OS/versão) · evidência (print/vídeo) · severidade × prioridade. Teste: outra pessoa reproduz só lendo?"},
+   {q:"Escreva um caso de teste para 'login com senha errada' (ID, pré-condição, passos, resultado esperado).",
+    m:"<b>ID:</b> CT-LOGIN-02 · <b>Pré-condição:</b> usuário cadastrado e ativo · <b>Passos:</b> abrir login → email válido → senha incorreta → clicar Entrar · <b>Esperado:</b> não autentica, permanece na tela e exibe 'Email ou senha inválidos' (sem dizer qual, por segurança)."}
+ ]},
+
+ b4:{ mc:[
+   {q:"No Gherkin, a ordem dos passos é:",
+    o:["Quando → Dado → Então.","Dado (contexto) → Quando (ação) → Então (resultado).","Então → Quando → Dado.","Não tem ordem."], c:1,
+    e:"Dado prepara o cenário, Quando executa a ação, Então verifica o resultado."},
+   {q:"Gherkin deve ser escrito de forma:",
+    o:["Imperativa (clique no botão azul de 20px).","Declarativa (descreve o comportamento, não a implementação).","Em inglês obrigatoriamente.","Só por desenvolvedores."], c:1,
+    e:"Foque no O QUÊ, não no COMO — fica estável e legível pro negócio."},
+   {q:"Para que serve o BDD no trabalho de QA?",
+    o:["Só pra documentar.","Alinhar negócio, dev e QA na mesma língua; os cenários viram base dos testes automatizados.","Substituir o código.","Medir performance."], c:1,
+    e:"É a ponte entre o que o negócio quer e o teste que roda."}
+ ], open:[
+   {q:"Escreva um cenário Gherkin para 'recuperação de senha' (Dado/Quando/Então).",
+    m:"<b>Cenário:</b> Solicitar redefinição com email cadastrado<br>Dado que estou na página 'Esqueci minha senha'<br>Quando informo um email cadastrado e clico em 'Enviar'<br>Então vejo 'Enviamos um link de redefinição para seu email'. <br><i>Bônus: adicione o cenário negativo (email não cadastrado).</i>"}
+ ]},
+
+ b5:{ mc:[
+   {q:"`==` vs `===` em JavaScript:",
+    o:["São idênticos.","`==` compara valor e tipo; `===` só valor.","`==` compara com coerção de tipo; `===` compara valor E tipo (prefira `===`).","`===` é inválido."], c:2,
+    e:"Ex.: 0 == '' é true, mas 0 === '' é false. Use sempre ==="},
+   {q:"O método de array `filter` faz o quê?",
+    o:["Soma todos os itens.","Retorna um novo array só com os itens que passam num teste.","Ordena o array.","Remove o array."], c:1,
+    e:"filter devolve os elementos para os quais a função retorna true."},
+   {q:"Para que serve `async/await`?",
+    o:["Deixar o código mais lento.","Lidar com operações assíncronas (requisições, navegação) de forma legível.","Criar variáveis.","Estilizar a página."], c:1,
+    e:"Essencial em teste de API e E2E, que esperam respostas que não são imediatas."},
+   {q:"`const` vs `let`:",
+    o:["São iguais.","`const` não permite reatribuir a variável; `let` permite.","`let` é obsoleto.","`const` só serve para números."], c:1,
+    e:"Prefira const por padrão; use let só quando precisar reatribuir."}
+ ], open:[
+   {q:"Explique com suas palavras o que esta função faz: `const dobro = n => n * 2;`",
+    m:"É uma arrow function chamada 'dobro' que recebe um número <code>n</code> e retorna o dobro dele (n × 2). Ex.: dobro(5) retorna 10."}
+ ]},
+
+ b6:{ mc:[
+   {q:"O que o TypeScript adiciona ao JavaScript?",
+    o:["Nada, é outra linguagem.","Tipos — o editor avisa erros antes de rodar.","Apenas cores no editor.","Um banco de dados."], c:1,
+    e:"TS = JS + tipagem estática; pega erros em tempo de escrita."},
+   {q:"Para que serve uma `interface` em TS?",
+    o:["Estilizar a tela.","Descrever o formato de um objeto (quais campos e tipos ele tem).","Rodar testes.","Conectar à internet."], c:1,
+    e:"Ex.: interface Cliente { nome: string; dias: number }."}
+ ], open:[
+   {q:"Por que tipagem (TypeScript) ajuda especificamente no trabalho de QA/automação?",
+    m:"Porque o editor avisa erros (ex.: passar texto onde devia ser número) <b>antes</b> de rodar o teste. Resultado: menos bug no próprio código de automação e testes mais confiáveis."}
+ ]},
+
+ b7:{ mc:[
+   {q:"Por que criar uma branch (`git checkout -b feature/x`) em vez de trabalhar na main?",
+    o:["Por enfeite.","Para isolar seu trabalho sem quebrar o código estável da main.","Porque a main é proibida.","Para deixar lento."], c:1,
+    e:"Branches isolam mudanças; a main fica sempre estável."},
+   {q:"O que você NUNCA deve subir (commit) para o repositório?",
+    o:["O README.","node_modules e senhas/tokens.","Os arquivos de teste.","O .gitignore."], c:1,
+    e:"Por isso existe o .gitignore — bloqueia node_modules, segredos, etc."},
+   {q:"O que é um Pull Request (PR)?",
+    o:["Um bug.","Um pedido para revisar e juntar (merge) suas mudanças de uma branch na principal.","Um comando de deletar.","Um tipo de teste."], c:1,
+    e:"É onde o time revisa o código antes de integrar."}
+ ], open:[
+   {q:"Escreva uma mensagem de commit no padrão Conventional Commits para 'adicionei teste de login'.",
+    m:"<code>test: adiciona teste e2e de login válido e inválido</code> — prefixos comuns: feat, fix, test, docs, refactor."}
+ ]},
+
+ b8:{ mc:[
+   {q:"O status code 404 significa:",
+    o:["Sucesso.","Recurso não encontrado.","Erro interno do servidor.","Não autorizado."], c:1,
+    e:"404 = not found. 200 = ok, 201 = criado, 401 = não autorizado, 500 = erro do servidor."},
+   {q:"Qual método HTTP normalmente CRIA um novo recurso?",
+    o:["GET.","POST.","DELETE.","Nenhum."], c:1,
+    e:"GET lê, POST cria, PUT/PATCH atualizam, DELETE remove."},
+   {q:"O que faz sentido testar numa API?",
+    o:["Só a cor da resposta.","Status code, formato/campos do JSON e casos de erro.","A fonte do texto.","O tamanho do monitor."], c:1,
+    e:"Contrato e comportamento: status, corpo, campos obrigatórios e erros."}
+ ], open:[
+   {q:"Você vai testar o endpoint GET /users/999 (usuário que não existe). O que você espera e o que validaria?",
+    m:"Espero status <b>404</b> (não encontrado) e um corpo de erro coerente (ex.: mensagem ou objeto vazio). Validaria: o status code é 404? a resposta não vaza dados de outro usuário? a mensagem é adequada?"}
+ ]},
+
+ b9:{ mc:[
+   {q:"Por que preferir `getByRole` a um seletor CSS no Playwright?",
+    o:["É mais rápido de digitar.","Reflete como o usuário/acessibilidade vê a página e é mais estável a mudanças de layout.","CSS não funciona.","É obrigatório."], c:1,
+    e:"Locators por role/label resistem a mudanças de classe/estilo — menos testes 'flaky'."},
+   {q:"O comando `npx playwright codegen URL` faz o quê?",
+    o:["Apaga os testes.","Grava suas ações no navegador e gera o código do teste.","Mede performance.","Publica o site."], c:1,
+    e:"Ótimo ponto de partida: você navega, ele escreve o esqueleto do teste."},
+   {q:"Page Object Model (POM) serve para:",
+    o:["Deixar o teste mais bonito só.","Organizar: cada página vira uma classe com seus seletores e ações, evitando repetição.","Testar performance.","Substituir o Playwright."], c:1,
+    e:"Quando a tela muda, você corrige num lugar só."}
+ ], open:[
+   {q:"Explique, com suas palavras, qual problema o Page Object Model resolve.",
+    m:"Sem POM, os seletores ficam repetidos em vários testes; se a tela muda, você corrige em N lugares. Com POM, cada página é uma classe que concentra seletores e ações — você corrige <b>num lugar só</b>, e os testes ficam limpos e reutilizáveis."}
+ ]}
+};
+
+/* ============ RENDER ============ */
+function renderQuiz(blockId){
+  const wrap=document.getElementById('quiz-'+blockId);
+  if(!wrap) return;
+  const data=QUIZ[blockId];
+  if(!data || ((!data.mc||!data.mc.length)&&(!data.open||!data.open.length))) return;
+  let html='<div class="quiz-title">📝 Responda aqui (corrige na hora)</div>';
+  wrap.innerHTML=html;
+
+  (data.mc||[]).forEach((item,i)=>{
+    const card=document.createElement('div'); card.className='q';
+    card.innerHTML=`<div class="q-num">QUESTÃO ${i+1}</div><div class="q-text">${item.q}</div>`;
+    item.o.forEach((opt,j)=>{
+      const o=document.createElement('label'); o.className='opt';
+      o.innerHTML=`<span class="dot"></span><span class="txt">${opt}</span>`;
+      o.onclick=()=>answerMC(blockId,i,j,card);
+      card.appendChild(o);
+    });
+    const fb=document.createElement('div'); fb.className='feedback'; card.appendChild(fb);
+    wrap.appendChild(card);
+    const saved=store[blockId+'_mc'+i];
+    if(saved!==undefined) lockMC(blockId,i,saved,card);
+  });
+
+  (data.open||[]).forEach((item,i)=>{
+    const card=document.createElement('div'); card.className='q';
+    card.innerHTML=`<div class="q-num">ABERTA ${i+1}</div><div class="q-text">${item.q}</div>
+      <textarea placeholder="Digite sua resposta...">${store[blockId+'_open'+i]||''}</textarea>
+      <div class="open-actions"><button class="mini-btn">Ver resposta-modelo</button><span class="saved">salvo ✓</span></div>
+      <div class="model"><b>Resposta-modelo:</b><br>${item.m}</div>
+      <div class="selfgrade">Como foi?
+        <button class="sg-btn" data-v="ok">Acertei</button>
+        <button class="sg-btn" data-v="mid">Parcial</button>
+        <button class="sg-btn" data-v="no">Errei</button></div>`;
+    wrap.appendChild(card);
+    const ta=card.querySelector('textarea');
+    const sv=card.querySelector('.saved');
+    ta.addEventListener('input',()=>{ store[blockId+'_open'+i]=ta.value; save(); sv.classList.add('show'); clearTimeout(ta._t); ta._t=setTimeout(()=>sv.classList.remove('show'),1200); });
+    const model=card.querySelector('.model'); const sg=card.querySelector('.selfgrade');
+    card.querySelector('.mini-btn').onclick=()=>{ model.classList.add('show'); sg.classList.add('show'); };
+    sg.querySelectorAll('.sg-btn').forEach(btn=>{
+      btn.onclick=()=>{ store[blockId+'_sg'+i]=btn.dataset.v; save(); sg.querySelectorAll('.sg-btn').forEach(b=>b.className='sg-btn'); btn.classList.add('sel-'+btn.dataset.v); updateProgress(); toast(); };
+    });
+    if(store[blockId+'_sg'+i]){ model.classList.add('show'); sg.classList.add('show'); const b=sg.querySelector('.sg-btn[data-v="'+store[blockId+'_sg'+i]+'"]'); if(b) b.classList.add('sel-'+store[blockId+'_sg'+i]); }
+  });
+}
+function answerMC(blockId,i,j,card){
+  const k=blockId+'_mc'+i;
+  if(store[k]!==undefined) return;
+  store[k]=j; save(); lockMC(blockId,i,j,card); updateProgress(); toast();
+}
+function lockMC(blockId,i,chosen,card){
+  const correct=QUIZ[blockId].mc[i].c;
+  const opts=card.querySelectorAll('.opt');
+  opts.forEach((o,k)=>{ o.classList.add('locked'); if(k===correct)o.classList.add('correct'); if(k===chosen&&chosen!==correct)o.classList.add('wrong'); });
+  const fb=card.querySelector('.feedback');
+  if(chosen===correct){ fb.className='feedback show ok'; fb.innerHTML='✓ Correto! '+QUIZ[blockId].mc[i].e; }
+  else { fb.className='feedback show no'; fb.innerHTML='✕ A correta é a verde. '+QUIZ[blockId].mc[i].e; }
+}
+
+/* ============ PROGRESSO ============ */
+function totalQuestions(){ let t=0; for(const k in QUIZ){ t+=(QUIZ[k].mc?QUIZ[k].mc.length:0)+(QUIZ[k].open?QUIZ[k].open.length:0); } return t; }
+function answeredCount(){
+  let n=0;
+  for(const k in QUIZ){
+    (QUIZ[k].mc||[]).forEach((_,i)=>{ if(store[k+'_mc'+i]!==undefined) n++; });
+    (QUIZ[k].open||[]).forEach((_,i)=>{ if(store[k+'_sg'+i]) n++; });
+  }
+  return n;
+}
+function updateProgress(){
+  const total=totalQuestions(), done=answeredCount();
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('fill').style.width=pct+'%';
+  document.getElementById('plabel').textContent=`${done} de ${total} respondidas (${pct}%)`;
+  document.querySelectorAll('.block').forEach(b=>{
+    const st=b.querySelector('.block-status'); if(!st) return;
+    const id=st.dataset.block; const d=QUIZ[id];
+    if(!d){ st.textContent='—'; return; }
+    const tot=(d.mc?d.mc.length:0)+(d.open?d.open.length:0);
+    if(tot===0){ st.textContent='—'; return; }
+    let dn=0; (d.mc||[]).forEach((_,i)=>{ if(store[id+'_mc'+i]!==undefined) dn++; }); (d.open||[]).forEach((_,i)=>{ if(store[id+'_sg'+i]) dn++; });
+    if(dn===tot){ st.textContent='✓ feito'; st.classList.add('done'); } else { st.textContent=`${dn}/${tot}`; st.classList.remove('done'); }
+  });
+}
+let toastTimer;
+function toast(){ const t=document.getElementById('toast'); t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),1300); }
+
+function toggle(head){
+  const b=head.closest('.block'); b.classList.toggle('open');
+  const idx=[...document.querySelectorAll('.block')].indexOf(b);
+  open[idx]=b.classList.contains('open'); localStorage.setItem(KEY+'_open', JSON.stringify(open));
+}
+function resetAll(){
+  if(!confirm('Zerar todas as respostas? Não dá pra desfazer.')) return;
+  store={}; localStorage.removeItem(KEY); location.reload();
+}
+
+/* init */
+Object.keys(QUIZ).forEach(renderQuiz);
+document.querySelectorAll('.block').forEach((b,i)=>{ if(open[i]) b.classList.add('open'); });
+updateProgress();
+</script>
+</body>
+</html>
