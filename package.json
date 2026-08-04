@@ -1,13 +1,15 @@
 {
-  "name": "estudoqa",
+  "name": "clara-qa-lab",
   "version": "1.0.0",
-  "description": "Portfólio de **Quality Assurance** de **Clara de Oliveira Luizon**.",
+  "description": "Portfólio de QA de Clara de Oliveira Luizon — testes automatizados do sistema EscolaNotas.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test": "cypress run"
   },
   "keywords": [],
-  "author": "",
+  "author": "Clara de Oliveira Luizon",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
