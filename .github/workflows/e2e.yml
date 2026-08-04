@@ -1,0 +1,41 @@
+name: Testes E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  cypress:
+    name: Cypress (regressão dos fluxos críticos)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Executar a suíte E2E
+        uses: cypress-io/github-action@v6
+        with:
+          browser: electron
+          start: python3 -m http.server 8080
+          wait-on: http://localhost:8080/Sistema-EscolaNotas.html
+          wait-on-timeout: 60
+          config: baseUrl=http://localhost:8080
+
+      - name: Publicar evidências das falhas
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+          retention-days: 7
