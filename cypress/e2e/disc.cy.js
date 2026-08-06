@@ -8,7 +8,7 @@ describe("Disciplinas", ()=> {
 
     })
 
-    it('CT-DSIC-01: Criar nova disciplina', ()=> {
+    it('CT-DISC-01: Criar nova disciplina', ()=> {
         cy.get('[data-testid="nav-disciplinas"]').click()
         cy.get('[data-testid="disc-nome"]').type('Geografia')
         cy.get('[data-testid="disc-carga"]').type('60')
