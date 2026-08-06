@@ -21,7 +21,7 @@ O **sistema EscolaNotas** (a aplicação `Sistema-EscolaNotas.html`) foi disponi
 | Arquivo | O que é |
 |---|---|
 | `PLANO-DE-TESTE.md` | Escopo, estratégia, riscos e critérios de entrada/saída |
-| [Casos-de-Teste-EscolaNotas](https://docs.google.com/spreadsheets/d/1JWYZHjidW-xUY-GNLFvotRnCuKOV8zJCH9BROBfryvA) | Matriz completa de casos de teste (funcionais, negativos, RBAC e exploratórios) |
+| `Casos-de-Teste-EscolaNotas.xlsx` | Matriz com 42 casos de teste — funcionais, negativos, RBAC e exploratórios. Traz aba de resumo, aba de defeitos e legenda. Também disponível no [Google Sheets](https://docs.google.com/spreadsheets/d/1JWYZHjidW-xUY-GNLFvotRnCuKOV8zJCH9BROBfryvA) |
 | `Sistema-EscolaNotas.html` | Sistema sob teste — abra no navegador para testar |
 | `cypress/e2e/` | Testes automatizados com Cypress |
 | `.github/workflows/e2e.yml` | Pipeline que roda a suíte a cada push na `main` |
@@ -54,12 +54,13 @@ python3 -m http.server 8080
 npx cypress run --config baseUrl=http://localhost:8080
 ```
 
-**Resultado esperado:** 19 testes, 19 passando.
+**Resultado esperado:** 25 testes, 25 passando.
 
 ```
 ✔  aluno.cy.js        13 passing
-✔  login.cy.js         3 passing
-✔  permissoes.cy.js    3 passing
+✔  disc.cy.js           6 passing
+✔  login.cy.js          3 passing
+✔  permissoes.cy.js     3 passing
 ```
 
 ---
@@ -71,6 +72,7 @@ Os testes seguem o padrão **Page Object Model**, separando *o que* é testado d
 ```
 cypress/e2e/
 ├── aluno.cy.js            # CT-ALUNO-01 a 13
+├── disc.cy.js             # CT-DISC-01 a 06
 ├── login.cy.js            # CT-LOGIN-01 a 03
 ├── permissoes.cy.js       # CT-AUTH-01 a 03
 └── pages/
@@ -109,19 +111,33 @@ cypress/e2e/
 
 | Requisito | Descrição | Casos escritos | Automatizado (Cypress) |
 |---|---|---|---|
-| RF01 | Login e perfis (RBAC) | ✅ Completo | ✅ 6 testes |
-| RF02 | Cadastro de alunos | ✅ Completo | ✅ 13 testes |
-| RF03 | Disciplinas e professores | ✅ Completo | ⬜ Não automatizado |
-| RF04 | Turmas | ✅ Completo | ⬜ Não automatizado |
-| RF05 | Lançamento de notas | 🟡 Em andamento | ⬜ Não automatizado |
-| RF06 | Situação por disciplina | 🟡 Em andamento | ⬜ Não automatizado |
-| RF07 | Situação geral do aluno | 🟡 Em andamento | ⬜ Não automatizado |
-| RF08 | Boletim e relatórios | 🟡 Em andamento | ⬜ Não automatizado |
+| RF01 | Login e perfis (RBAC) | ✅ 8 casos | ✅ 6 testes |
+| RF02 | Cadastro de alunos | ✅ 14 casos | ✅ 13 testes |
+| RF03 | Disciplinas e professores | ✅ 20 casos | 🟡 6 testes (só disciplinas) |
+| RF04 | Turmas | ⬜ Sem casos escritos | ⬜ Não automatizado |
+| RF05 | Lançamento de notas | ⬜ Sem casos escritos | ⬜ Não automatizado |
+| RF06 | Situação por disciplina | ⬜ Sem casos escritos | ⬜ Não automatizado |
+| RF07 | Situação geral do aluno | ⬜ Sem casos escritos | ⬜ Não automatizado |
+| RF08 | Boletim e relatórios | ⬜ Sem casos escritos | ⬜ Não automatizado |
 
 **Casos escritos** = documentados na matriz de casos de teste e executados manualmente.
 **Automatizado** = coberto pela suíte Cypress que roda no CI a cada push.
 
-Próximos passos: automatizar RF03 e RF04 e, na sequência, as regras de cálculo (RF05–RF07) — que são as de maior risco, por envolverem valores limite.
+A matriz manual é maior que a suíte automatizada de propósito: automatiza-se o que é repetitivo e estável, não tudo. Dos 42 casos, 25 já estão automatizados — a coluna **Automatizado** da planilha aponta o arquivo de cada um.
+
+Próximos passos: escrever os casos de RF04 e, na sequência, as regras de cálculo (RF05–RF07) — as de maior risco, por envolverem valores limite (notas `0`/`10`, médias `4,0`/`7,0` e frequência `75%`).
+
+---
+
+## 🐞 Defeitos encontrados
+
+Três defeitos confirmados durante a execução, documentados na aba **Defeitos** da matriz com passos para reprodução, esperado × obtido, severidade e análise de impacto.
+
+| ID | Defeito | Caso | Severidade |
+|---|---|---|---|
+| BUG-01 | Aluno que já vem cadastrado sem e-mail não pode ter nenhum dado editado, porque a validação exige e-mail. Os dados iniciais violam a regra que o próprio sistema aplica. | CT-ALUNO-14 | Média |
+| BUG-02 | Ao excluir uma disciplina que está aberta em edição, o formulário continua preenchido. Salvar não grava nada e não exibe erro — falha silenciosa. | CT-DISC-07 | Média |
+| BUG-03 | Excluir uma disciplina não remove o vínculo com o professor. O professor fica exibindo `—` e sem nenhuma disciplina válida, violando o RF03. | CT-DISC-13 | Alta |
 
 ---
 
