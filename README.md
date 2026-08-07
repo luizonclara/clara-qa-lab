@@ -136,7 +136,7 @@ Três defeitos confirmados durante a execução, documentados na aba **Defeitos*
 | ID | Defeito | Caso | Severidade |
 |---|---|---|---|
 | BUG-01 | Aluno que já vem cadastrado sem e-mail não pode ter nenhum dado editado, porque a validação exige e-mail. Os dados iniciais violam a regra que o próprio sistema aplica. | CT-ALUNO-14 | Média |
-| BUG-02 | Ao excluir uma disciplina que está aberta em edição, o formulário continua preenchido. Salvar não grava nada e não exibe erro — falha silenciosa. | CT-DISC-07 | Média |
+| BUG-02 | Ao excluir uma disciplina aberta em edição, o formulário continua preenchido. Ao salvar, a aplicação lança `TypeError: Cannot set properties of undefined` e nada é gravado — sem qualquer aviso na tela. | CT-DISC-07 | Alta |
 | BUG-03 | Excluir uma disciplina não remove o vínculo com o professor. O professor fica exibindo `—` e sem nenhuma disciplina válida, violando o RF03. | CT-DISC-13 | Alta |
 
 ---
